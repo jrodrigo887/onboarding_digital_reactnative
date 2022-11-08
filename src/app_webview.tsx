@@ -24,11 +24,13 @@ interface NativeAction {
 
 interface WebviewProps {
   navigation?: any;
-  url?: string;
+  route?: any;
+  uri?: string;
 }
 
-const AppWebView = ({ navigation, url }: WebviewProps) => {
+const AppWebView = ({ route, navigation, uri }: WebviewProps) => {
   let webRef = useRef<WebView<{ ref: unknown; onLoadEnd?: () => void; source: { uri: string; }; onMessage: unknown; }> | null>(null);
+  let url = useRef(route.params.url)
   // comando obrigatório para comunicação com lite
   const runBeforeFirst = `window.isReactNativeWebView = true`;
   
@@ -64,8 +66,6 @@ const AppWebView = ({ navigation, url }: WebviewProps) => {
       Alert.alert('Permissão de Câmera negada');
     }
   };
-
-  console.log('url => ', url)
 
   // acessar a câmera
   const getMedia = (params?:  NativeAction): Promise<any> => {
@@ -172,8 +172,8 @@ const AppWebView = ({ navigation, url }: WebviewProps) => {
     <View style={{ flex: 1 }}>
       <WebView 
         ref={f => webRef.current = f}
-        // onLoadEnd={() => { requestCameraPermission() }}
-        source={{uri:'http://192.168.100.41:8082/onboarding/autoid/c873938a-7c34-43a8-9218-66f6b45e3066'}} 
+        // onLoadEnd={() => { requestCameraPermission() }} 
+        source={{uri: url.current }} 
         onMessage={(event) => {
           const { nativeEvent } = event;
 

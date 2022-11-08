@@ -23,7 +23,10 @@ const App = () => {
     <NavigationContainer>
       <Stack.Navigator>
         <Stack.Screen name='Home' component={Home} />
-        <Stack.Screen name='AppWebView' component={() => AppWebView({ url: '' }) } />
+        {/* <Stack.Screen name='AppWebView' component={AppWebView} /> */}
+        <Stack.Screen name='AppWebView' >
+          {(props) => <AppWebView {...props}></AppWebView>}
+        </Stack.Screen>
         <Stack.Screen name='Camera' component={Camera} />
       </Stack.Navigator>
     </NavigationContainer>

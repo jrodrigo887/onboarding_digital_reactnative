@@ -11,23 +11,94 @@
  
  import { createNativeStackNavigator } from '@react-navigation/native-stack';
  import React, { useState } from 'react';
- import {Alert, Button, StyleSheet, TextInput, View} from 'react-native';
-
- 
+ import {Alert, Button, StyleSheet, Text, TextInput, View } from 'react-native';
+ import RNPickerSelect from 'react-native-picker-select';
+ import {Picker} from '@react-native-picker/picker';
+ import SelectDropdown from 'react-native-select-dropdown';
+ interface SelectOption {
+  label: string;
+  value: string;
+ } 
 const Home = ({navigation}: {navigation: any}) => {
-    const [text, onChangeText] = useState('https://')
+    const [text, onChangeText] = useState('')
+    const [urlFull, setChangeUrlFull] = useState('')
+    const [ambient, onChangeAmbient] = useState('http://192.168.100.41:8082/onboarding/autoid/c873938a-7c34-43a8-9218-66f6b45e3066')
     function handleNavigate() {
-        navigation.navigate('AppWebView', { url: text })
+      navigation.navigate('AppWebView', { url: urlFull })
+    }
+
+    const ambients: SelectOption[] = [
+      { label: 'Prod', value: 'https://app.certfy.tech/onboarding/autoid/' },
+      { label: 'Dev', value: 'https://app-dev.certfy.tech/onboarding/autoid/' },
+      { label: 'Test', value: 'https://app-test.certfy.tech/onboarding/autoid/' },
+      { label: 'Homol', value: 'https://app-hmlg.certfy.tech/onboarding/autoid/' },
+      { label: 'locahost', value: 'http://192.168.100.41:8082/onboarding/autoid/' },
+    ]
+
+    const topics: SelectOption[] = [
+      { label: 'AutoId Prod', value: '' },
+      { label: 'AutoId Dev', value: 'c873938a-7c34-43a8-9218-66f6b45e3066' },
+      { label: 'AutoId Test', value: 'c2e8f18b-ea7d-4d85-96b4-e3a8906d4a9a' },
+      { label: 'AutoId Homol', value: '' },
+    ]
+    
+    function onChangeInputText() {
+      setChangeUrlFull(ambient+text)
+    }
+
+    function onClear() {
+      setChangeUrlFull('')
+      onChangeAmbient('')
+      onChangeText('')
     }
 
    return (
      <View style={styles.container}>
-          <TextInput style={styles.input}
-            onChangeText={onChangeText}
-            value={text}
-          >
-          </TextInput>
-         <Button onPress={() => handleNavigate()} title="Atendimento Lite"/>
+        <Text>
+          Ambiente:   
+        </Text>
+        <SelectDropdown
+            data={ambients}
+            onSelect={(selectedItem: SelectOption, index: number) => {
+              onChangeAmbient(selectedItem.value)
+            }}
+            buttonTextAfterSelection={(selectedItem: SelectOption, index: number) => {
+              return selectedItem.label
+            }}
+            rowTextForSelection={(item: SelectOption, index: number) => {
+              return item.label
+            }}
+        />
+        <Text>
+          Assunto:   
+        </Text>
+        <SelectDropdown
+            data={topics}
+            onSelect={(selectedItem: SelectOption, index: number) => {
+              onChangeText(selectedItem.value)
+            }}
+            buttonTextAfterSelection={(selectedItem: SelectOption, index: number) => {
+              return selectedItem.label
+            }}
+            rowTextForSelection={(item: SelectOption, index: number) => {
+              return item.label
+            }}
+        />
+
+        <TextInput style={styles.input}
+          onChangeText={onChangeText}
+          value={text}  >
+        </TextInput>
+        <View style={styles.button}>
+          <Button onPress={() => onChangeInputText()} title="Setar Assunto"/>
+        </View>
+        <View style={styles.button}>
+          <Button onPress={() => onClear()} title="Limpar Assunto"/>
+        </View>
+        <Text>
+          Url: { urlFull }
+        </Text>
+        <Button onPress={() => handleNavigate()} title="Atendimento Lite"/>
      </View>
    );
  };
@@ -38,7 +109,7 @@ const Home = ({navigation}: {navigation: any}) => {
      flexDirection: 'column',
      alignItems: 'center',
      justifyContent: 'center',
-     backgroundColor: 'black',
+     backgroundColor: 'white',
    },
    preview: {
      flex: 1,
@@ -60,6 +131,9 @@ const Home = ({navigation}: {navigation: any}) => {
     borderWidth: 1,
     padding: 10,
   },
+  button: {
+    marginTop: 16
+  }
  });
  
  export default Home;
