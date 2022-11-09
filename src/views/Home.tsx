@@ -11,9 +11,7 @@
  
  import { createNativeStackNavigator } from '@react-navigation/native-stack';
  import React, { useState } from 'react';
- import {Alert, Button, StyleSheet, Text, TextInput, View } from 'react-native';
- import RNPickerSelect from 'react-native-picker-select';
- import {Picker} from '@react-native-picker/picker';
+ import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
  import SelectDropdown from 'react-native-select-dropdown';
  interface SelectOption {
   label: string;
