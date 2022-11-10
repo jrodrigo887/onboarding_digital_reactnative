@@ -4,11 +4,19 @@ import { Alert, PermissionsAndroid, StyleSheet, View, Text, TouchableOpacity } f
 import { RNCamera, TakePictureOptions } from 'react-native-camera';
 import WebView from 'react-native-webview';
 
-
+// estrutura para retorno das "capturas"
 interface NativeActionResponse {
   success: boolean;
   response: string;
 }
+
+// Estrutura de coomunicação entre webview e o nativo 
+interface NativeAction {
+  key: string;
+  callback: string;
+  value: string | ValueMedia;
+}
+
 
 type ValueMedia = {
     camera: number;
@@ -16,11 +24,7 @@ type ValueMedia = {
     ballonSubtitle: string;
 }
 
-interface NativeAction {
-  key: string;
-  callback: string;
-  value: string | ValueMedia;
-}
+
 
 interface WebviewProps {
   navigation?: any;
@@ -31,21 +35,23 @@ interface WebviewProps {
 const AppWebView = ({ route, navigation, uri }: WebviewProps) => {
   let webRef = useRef<WebView<{ ref: unknown; onLoadEnd?: () => void; source: { uri: string; }; onMessage: unknown; }> | null>(null);
   let url = useRef(route.params.url)
-  // comando obrigatório para comunicação com lite
+
+  // é necessário injetar essa variável de forma global para identificação da mesma dentro da webview
   const runBeforeFirst = `window.isReactNativeWebView = true`;
+
+   // passar retorno das capturas entre outras coisas pelo callback
+   const webViewCallback = (data: string) =>
+   `(function() {
+     window.reactWebViewCallback(${JSON.stringify(data)});
+   })()`;
+
   
   // camera refs
   let cameraRef: RNCamera | null;
   const [isCameraActive, setCameraActive] = useState(false);
   const cameraType = useRef(RNCamera.Constants.Type.front)
-    
-  // comunicação com a webview
-  const webViewCallback = (data: string) =>
-      `(function() {
-        window.reactWebViewCallback(${JSON.stringify(data)});
-      })()`;
-
-  function handleNavigate(paramName: string) {
+  
+  function handlerNavigate(paramName: string) {
     navigation.navigate(paramName);
   }
   
@@ -70,8 +76,6 @@ const AppWebView = ({ route, navigation, uri }: WebviewProps) => {
   // acessar a câmera
   const getMedia = (params?:  NativeAction): Promise<any> => {
     return new Promise<string>((resolve, reject) => {
-      console.log(params);
-
       if (params) {
         const paramName = params.value as ValueMedia;
         cameraType.current = paramName.camera === 1
@@ -80,6 +84,9 @@ const AppWebView = ({ route, navigation, uri }: WebviewProps) => {
       }
 
       setCameraActive(true);
+
+      // retorna a captura da imagem
+      // webViewCallback(base64)
     });
   }
 
@@ -87,12 +94,18 @@ const AppWebView = ({ route, navigation, uri }: WebviewProps) => {
   const getGalleryMedia = (params?: NativeAction |  undefined): Promise<string> => {
     // código
     return Promise.resolve('');
+
+    // retorna da imagem
+    // webViewCallback(base64)
   }
 
   // Ler Qr Code
   const readQrCode = (params?: NativeAction |  undefined): Promise<string> => {
     // código
     return Promise.resolve('');
+
+    // retorna da imagem
+    // webViewCallback(string)
   }
 
   // Baixar arquivo para o dispositivo
@@ -103,11 +116,12 @@ const AppWebView = ({ route, navigation, uri }: WebviewProps) => {
 
   const actionToFinish = (params?: string | NativeAction |  undefined): Promise<any> => {
     return new Promise((resolve, reject) => {
-      handleNavigate('Home')
+      handlerNavigate('Home')
       resolve('');
     });
   }
 
+  // entrada para comunicação entre webview e o nativo
   const entryCaptures = async (data: string) => {
     const nativeAction = JSON.parse(data) as NativeAction;
     
